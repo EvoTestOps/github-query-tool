@@ -1,0 +1,28 @@
+[output]
+path = "data/github/log_analysis_search_results.csv"
+
+[github]
+
+per_page = 100
+sort = "stars"
+order = "desc"
+
+[query]
+queries = [
+  '"log anomaly" software',
+  '"log anomaly" system',
+  '"log-based anomaly" software',
+  '"log-based anomaly" system',
+  '"anomaly detection in log"',
+]
+
+search_in = [
+  "name",
+  "description",
+  "readme"
+]
+
+archived = false
+fork = false
+stars = ">=0"
+size = ">=0"
