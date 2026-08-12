@@ -1,9 +1,4 @@
-import base64
-import csv
 import os
-import time
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 import argparse
 import tomllib
 
