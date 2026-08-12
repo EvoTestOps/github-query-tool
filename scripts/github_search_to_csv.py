@@ -210,7 +210,7 @@ def main():
             print(f"Fetched: {full_name}")
 
             row = {
-                "repository_title": full_name,
+                "repository_name": full_name,
                 "description": repo.get("description") or "",
                 "html_url": repo["html_url"],
                 "stars": repo.get("stargazers_count", 0),
@@ -230,7 +230,7 @@ def main():
     rows.sort(key=lambda r: int(r["stars"]), reverse=True)
 
     fieldnames = [
-        "repository_title",
+        "repository_name",
         "description",
         "html_url",
         "stars",

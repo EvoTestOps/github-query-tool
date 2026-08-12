@@ -251,7 +251,7 @@ with right_column:
                 readme = fetch_readme(owner, name)
 
                 row = {
-                    "repo_name": full_name,
+                    "repository_name": full_name,
                     "description": repo.get("description") or "",
                     "html_url": repo["html_url"],
                     "stars": repo.get("stargazers_count", 0),
@@ -273,7 +273,7 @@ with right_column:
         rows.sort(key=lambda r: int(r["stars"]), reverse=True)
 
         fieldnames = [
-            "repo_name",
+            "repository_name",
             "description",
             "html_url",
             "stars",
