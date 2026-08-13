@@ -1,6 +1,6 @@
 # GitHub Repository Collector
 
-Searches GitHub for repositories matching configurable queries and exports the results to CSV. The output is formatted to be compatible with [AiSysRev](https://github.com/EvoTestOps/AISysRevCmdLine) for screening GitHub repositories in a systematic literature review.
+Searches GitHub for repositories matching configurable queries and exports the results to CSV. The output is formatted to be compatible with [AiSysRev](https://github.com/EvoTestOps/AISysRev) for screening GitHub repositories in a systematic literature review.
 
 ## Requirements
 
