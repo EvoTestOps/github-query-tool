@@ -110,7 +110,7 @@ with left_column:
     fork = st.checkbox("Include forks", value=False, help="Include forked repositories in the results.")
 
     stars = st.text_input("Stars", value="", help="Filter repositories by star count, for example: '>5'")
-    size = st.text_input("Size", value="", help="Filter repositories by size, for example: '>1000'")
+    size = st.text_input("Size", value="", help="Filter repositories by size in KB, for example: '>1000'")
 
     show_samples = st.checkbox("Show sample repositories of each query", value=False, help="Show top results for each query")
 
@@ -164,7 +164,7 @@ with left_column:
         count_clicked = st.button("Count results")
 
     with search_column:
-        search_clicked = st.button("Search results")
+        search_clicked = st.button("Save results")
 
 with right_column:
     if not count_clicked and not search_clicked:
