@@ -68,17 +68,8 @@ def get_queries(config):
 
 def github_get(url, params=None):
     response = session.get(url, headers=HEADERS, params=params, timeout=30)
-
     if response.status_code in (403, 429):
-        print("Rate limit or forbidden response:")
-        print(response.text[:500])
-
-        response = session.get(
-            url,
-            headers=HEADERS,
-            params=params,
-            timeout=30,
-        )
+        print(f"GitHub returned {response.status_code}: Rate limit or forbidden response")
 
     response.raise_for_status()
     return response.json()
@@ -146,12 +137,15 @@ def fetch_readme(owner, repo):
     try:
         data = github_get(url)
     except requests.HTTPError as error:
-        if error.response is not None and error.response.status_code == 404:
-            return ""
-        print(f"HTTP error")
+        if error.response is not None:
+            if error.response.status_code == 404:
+                return ""
+            if error.response.status_code in (403, 429):
+                raise
+        print(f"HTTP error {error} while fetching README for {owner}/{repo}")
         return ""
     except requests.exceptions.RequestException as error:
-        print(f"Network error")
+        print(f"Network error {error} while fetching README for {owner}/{repo}")
         return ""
 
     content = data.get("content", "")
@@ -176,13 +170,23 @@ def main():
 
     args = parser.parse_args()
 
-    config = load_config(args.config)
-    github_config = config["github"]
+    try:
+        config = load_config(args.config)
+        github_config = config["github"]
 
-    output_path = args.output or config["output"]["path"]
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        output_path = args.output or config["output"]["path"]
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    queries = get_queries(config)
+        queries = get_queries(config)
+    except FileNotFoundError:
+        print(f"Missing configuration file: {args.config}")
+        return
+    except KeyError as e:
+        print(f"Missing configuration field: {e}")
+        return
+    except tomllib.TOMLDecodeError as e:
+        print(f"Invalid TOML configuration: {e}")
+        return
 
     print("Generated the following GitHub queries:")
     for query in queries:
@@ -190,39 +194,39 @@ def main():
 
     seen = {}
     rows = []
+    try:
+        for query in queries:
+            print(f"Searching query: {query}")
+            repos = search_repositories(query, github_config)
 
-    for query in queries:
-        print(f"Searching query: {query}")
-        repos = search_repositories(query, github_config)
+            for repo in repos:
+                full_name = repo["full_name"]
 
-        for repo in repos:
-            full_name = repo["full_name"]
+                if full_name in seen:
+                    seen[full_name]["matched_queries"].append(query)
+                    continue
 
-            if full_name in seen:
-                seen[full_name]["matched_queries"].append(query)
-                continue
+                owner = repo["owner"]["login"]
+                name = repo["name"]
 
-            owner = repo["owner"]["login"]
-            name = repo["name"]
+                readme = fetch_readme(owner, name)
+                print(f"Fetched: {full_name}")
 
-            
-            readme = fetch_readme(owner, name)
-            print(f"Fetched: {full_name}")
+                row = {
+                    "repository_name": full_name,
+                    "description": repo.get("description") or "",
+                    "html_url": repo["html_url"],
+                    "stars": repo.get("stargazers_count", 0),
+                    "language": repo.get("language") or "",
+                    "readme": readme,
+                }
 
-            row = {
-                "repository_name": full_name,
-                "description": repo.get("description") or "",
-                "html_url": repo["html_url"],
-                "stars": repo.get("stargazers_count", 0),
-                "language": repo.get("language") or "",
-                "readme": readme,
-            }
-
-            seen[full_name] = {
-                "row": row,
-                "matched_queries": [query],
-            }
-
+                seen[full_name] = {
+                    "row": row,
+                    "matched_queries": [query],
+                }
+    except requests.exceptions.RequestException as e:
+        print(f"GitHub request failed: {e}")
 
     for item in seen.values():
         rows.append(item["row"])
