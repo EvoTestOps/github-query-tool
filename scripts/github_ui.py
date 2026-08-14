@@ -1,6 +1,7 @@
 import streamlit as st
 import time
 import csv
+import requests
 
 from query_count import count_repositories, get_queries, HEADERS as COUNT_HEADERS
 
@@ -176,7 +177,7 @@ with right_column:
             """,
             unsafe_allow_html=True,
         )
-    
+
     if count_clicked:
         st.subheader("Count results")
         config = build_config()
@@ -187,28 +188,32 @@ with right_column:
 
         rows = []
         sample_results = []
-        for query in queries:
-            total_count, items = count_repositories(query, samples)
+        try:
+            for query in queries:
+                total_count, items = count_repositories(query, samples)
 
-            rows.append(
-                {
-                    "query": query,
-                    "total_count": total_count
-                }
-            )
-            if items:
-                sample_results.append(
+                rows.append(
                     {
                         "query": query,
-                        "total_count": total_count,
-                        "items": items,
+                        "total_count": total_count
                     }
                 )
+                if items:
+                    sample_results.append(
+                        {
+                            "query": query,
+                            "total_count": total_count,
+                            "items": items,
+                        }
+                    )
+
+        except requests.exceptions.RequestException as e:
+            st.error(f"GitHub request failed: {e}")
+
         st.dataframe(rows)
 
         if sample_results:
             st.subheader("Sample repositories")
-
             for result in sample_results:
                 st.markdown(f"### {result['query']}")
                 st.write(f"Total count: {result['total_count']}")
@@ -233,39 +238,40 @@ with right_column:
         seen = {}
         rows = []
         logs = []
+        try:
+            for query in queries:
+                repos = search_repositories(query, github_config)
 
-        for query in queries:
-            repos = search_repositories(query, github_config)
+                for repo in repos:
+                    full_name = repo["full_name"]
 
-            for repo in repos:
-                full_name = repo["full_name"]
+                    if full_name in seen:
+                        seen[full_name]["matched_queries"].append(query)
+                        continue
 
-                if full_name in seen:
-                    seen[full_name]["matched_queries"].append(query)
-                    continue
+                    owner = repo["owner"]["login"]
+                    name = repo["name"]
+                    logs.append(f"Fetching README: {full_name}")
+                    log_area.text("\n".join(logs[-15:]))
+                    readme = fetch_readme(owner, name)
 
-                owner = repo["owner"]["login"]
-                name = repo["name"]
-                logs.append(f"Fetching README: {full_name}")
-                log_area.text("\n".join(logs[-15:]))
-                readme = fetch_readme(owner, name)
+                    row = {
+                        "repository_name": full_name,
+                        "description": repo.get("description") or "",
+                        "html_url": repo["html_url"],
+                        "stars": repo.get("stargazers_count", 0),
+                        "language": repo.get("language") or "",
+                        "readme": readme,
+                        "decision": "",
+                        "reason": "",
+                    }
 
-                row = {
-                    "repository_name": full_name,
-                    "description": repo.get("description") or "",
-                    "html_url": repo["html_url"],
-                    "stars": repo.get("stargazers_count", 0),
-                    "language": repo.get("language") or "",
-                    "readme": readme,
-                    "decision": "",
-                    "reason": "",
-                }
-
-                seen[full_name] = {
-                    "row": row,
-                    "matched_queries": [query],
-                }
-
+                    seen[full_name] = {
+                        "row": row,
+                        "matched_queries": [query],
+                    }
+        except requests.exceptions.RequestException as e:
+            st.error(f"GitHub request failed and search stopped: {e}")
 
         for item in seen.values():
             rows.append(item["row"])
