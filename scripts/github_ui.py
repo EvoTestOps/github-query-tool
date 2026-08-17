@@ -100,14 +100,15 @@ with left_column:
     "log-based anomaly" system,
     "anomaly detection in log"''',
         height=250,
+        help="Seperate queries by new lines. Each query will be combined with the selected filters to search for repositories."
     )
 
     search_name = st.checkbox("Search in name", value=True)
     search_description = st.checkbox("Search in description", value=True)
     search_readme = st.checkbox("Search in README", value=True)
 
-    archived = st.checkbox("Include archived repositories", value=False, help="Include archived repositories in the results.")
-    fork = st.checkbox("Include forks", value=False, help="Include forked repositories in the results.")
+    archived = st.checkbox("Include archived repositories", value=False)
+    fork = st.checkbox("Include forks", value=False)
 
     stars = st.text_input("Stars", value="", help="Filter repositories by star count, for example: '>5'")
     size = st.text_input("Size", value="", help="Filter repositories by size in KB, for example: '>1000'")
@@ -222,7 +223,7 @@ with right_column:
                     st.write(f"{repo['full_name']} — {repo.get('description') or ''}")
 
     if search_clicked:
-        st.subheader("Search results")
+        st.subheader("Saving results")
         log_box = st.container(height=300)
         log_area = log_box.empty()
         config = build_config()
