@@ -48,9 +48,9 @@ export GITHUB_TOKEN="your_token_here"
 Run the repository search tool in the repository root:
 
 ```bash
-python3 scripts/github_search_to_csv.py --config configs/log_analysis.toml
+python3 scripts/github_search_to_csv.py --config configs/config.toml
 # or with uv:
-uv run scripts/github_search_to_csv.py --config configs/log_analysis.toml
+uv run scripts/github_search_to_csv.py --config configs/config.toml
 ```
 
 The output path is defined in the config file.
@@ -60,13 +60,13 @@ The output path is defined in the config file.
 To count how many repositories each query matches:
 
 ```bash
-python3 scripts/query_count.py --config configs/log_analysis.toml
+python3 scripts/query_count.py --config configs/config.toml
 # or with uv:
-uv run scripts/query_count.py --config configs/log_analysis.toml
+uv run scripts/query_count.py --config configs/config.toml
 ```
 
 Also show sample repositories:
 
 ```bash
-python3 scripts/query_count.py --config configs/log_analysis.toml --samples
+python3 scripts/query_count.py --config configs/config.toml --samples
 ```
