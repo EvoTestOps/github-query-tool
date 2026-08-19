@@ -87,21 +87,32 @@ def main():
     parser.add_argument("--samples", action="store_true")
 
     args = parser.parse_args()
-
-    config = load_config(args.config)
-    queries = get_queries(config)
+    try:
+        config = load_config(args.config)
+        queries = get_queries(config)
+    except FileNotFoundError:
+        print(f"Configuration file not found: {args.config}")
+        return
+    except tomllib.TOMLDecodeError as e:
+        print(f"Invalid TOML file: {e}")
+        return
+    except KeyError as e:
+        print(f"Missing field: {e}")
+        return
 
     samples = SAMPLES if args.samples else 0
+    try:
+        for query in queries:
+            total_count, items = count_repositories(query, samples)
 
-    for query in queries:
-        total_count, items = count_repositories(query, samples)
+            print(query)
+            print(f"  total_count: {total_count}")
+            for repo in items:
+                print(f"{repo['full_name']}  Description: {repo['description']}")
+            print()
 
-        print(query)
-        print(f"  total_count: {total_count}")
-        for repo in items:
-            print(f"{repo['full_name']}  Description: {repo['description']}")
-        print()
-
-
+    except requests.exceptions.RequestException as e:
+        print(f"GitHub request failed: {e}")
+        return
 if __name__ == "__main__":
     main()
