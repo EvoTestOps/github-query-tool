@@ -1,11 +1,12 @@
 [output]
-path = "data/github/log_analysis_search_results.csv"
+path = "data/search_results.csv"
 
 [github]
 
 per_page = 100
 sort = "stars"
 order = "desc"
+max_chars=0
 
 [query]
 queries = [

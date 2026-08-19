@@ -122,7 +122,7 @@ with left_column:
 
     max_readme_chars = st.text_input("Max README characters", value="", help="Maximum number of README characters to save")
 
-    output_path = st.text_input("Output CSV path", value="data/log_analysis_repos.csv", help="Path for saving the CSV file with the search results.")
+    output_path = st.text_input("Output CSV path", value="data/search_results.csv", help="Path for saving the CSV file with the search results.")
 
     def build_config():
         search_in = []
