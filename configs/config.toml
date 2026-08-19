@@ -1,14 +1,17 @@
 [output]
+# Path for the generated CSV file
 path = "data/search_results.csv"
 
 [github]
-
 per_page = 100
 sort = "stars"
 order = "desc"
+
+# Maximum number of characters from README to save. Set to 0 for no limit"
 max_chars=0
 
 [query]
+# Placeholder GitHub search queries
 queries = [
   '"log anomaly" software',
   '"log anomaly" system',
