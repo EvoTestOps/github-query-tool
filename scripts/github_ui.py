@@ -119,6 +119,9 @@ with left_column:
     if show_samples:
         sample_count = st.number_input("Sample count", min_value=1, max_value=15, value=3)
 
+
+    max_readme_chars = st.text_input("Max README characters", value="", help="Maximum number of README characters to save")
+
     output_path = st.text_input("Output CSV path", value="data/log_analysis_repos.csv", help="Path for saving the CSV file with the search results.")
 
     def build_config():
@@ -254,7 +257,8 @@ with right_column:
                     name = repo["name"]
                     logs.append(f"Fetching README: {full_name}")
                     log_area.text("\n".join(logs[-15:]))
-                    readme = fetch_readme(owner, name)
+                    max_chars =  int(max_readme_chars.strip()) if max_readme_chars.strip() else None
+                    readme = fetch_readme(owner, name, max_chars)
 
                     row = {
                         "repository_name": full_name,

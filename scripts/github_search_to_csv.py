@@ -131,7 +131,7 @@ def search_repositories(query, github_config):
     return repos
 
 
-def fetch_readme(owner, repo):
+def fetch_readme(owner, repo, max_chars=0):
     url = f"https://api.github.com/repos/{owner}/{repo}/readme"
 
     try:
@@ -151,9 +151,12 @@ def fetch_readme(owner, repo):
     content = data.get("content", "")
     encoding = data.get("encoding")
     if encoding == "base64":
-        return base64.b64decode(content).decode("utf-8", errors="replace")
-
-    return content
+        readme = base64.b64decode(content).decode("utf-8", errors="replace")
+    else:
+        readme = content
+    if max_chars > 0:
+        readme = readme[:max_chars]
+    return readme
 
 
 
@@ -173,6 +176,8 @@ def main():
     try:
         config = load_config(args.config)
         github_config = config["github"]
+
+        max_chars = github_config.get("max_chars", 0)
 
         output_path = args.output or config["output"]["path"]
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -209,7 +214,7 @@ def main():
                 owner = repo["owner"]["login"]
                 name = repo["name"]
 
-                readme = fetch_readme(owner, name)
+                readme = fetch_readme(owner, name, max_chars)
                 print(f"Fetched: {full_name}")
 
                 row = {
