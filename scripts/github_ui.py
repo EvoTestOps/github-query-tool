@@ -8,7 +8,7 @@ from query_count import count_repositories, get_queries, HEADERS as COUNT_HEADER
 from github_search_to_csv import search_repositories, fetch_readme, HEADERS as SEARCH_HEADERS
 
 st.set_page_config(
-    page_title="GitHub query tool",
+    page_title="GitHub Query Tool",
     layout="wide",
 )
 

@@ -62,7 +62,7 @@ def get_queries(config):
 
 def count_repositories(query, samples):
     per_page = samples if samples > 0 else 1
-    response = requests.get(
+    response = session.get(
         "https://api.github.com/search/repositories",
         headers=HEADERS,
         params={
